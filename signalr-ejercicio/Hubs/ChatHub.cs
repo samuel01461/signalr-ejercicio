@@ -27,6 +27,7 @@ namespace signalr_ejercicio.Hubs
         {
             return UsersManager.ObtenerUsuarios();
         }
+
         public async Task EnviarMensaje(string mensaje)
         {
             var emisor = Context.ConnectionId;

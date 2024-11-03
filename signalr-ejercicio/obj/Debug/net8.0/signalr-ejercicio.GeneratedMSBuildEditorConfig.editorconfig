@@ -18,10 +18,6 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\samuel\source\repos\signalr-ejercicio\signalr-ejercicio
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/samuel/source/repos/signalr-ejercicio/signalr-ejercicio/Pages/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/samuel/source/repos/signalr-ejercicio/signalr-ejercicio/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
