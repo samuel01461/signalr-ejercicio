@@ -1,0 +1,120 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Chat Grupal";
+}
+
+<h1>Chat Grupal</h1>
+<div id="usuarios_section">
+    <ul id="usuarios">
+    </ul>
+</div>
+<div id="mensajes_section">
+    <h2>Ultimos mensajes:</h2>
+    <ul id="mensajes">
+    </ul>
+</div>
+<div id="chat_input">
+    <input type="text" id="mensaje" name="mensaje">
+    <button type="submit" id="enviar" name="enviar">Enviar</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js">
+</script>
+
+<script>
+    const conn = new signalR.HubConnectionBuilder().withUrl("/ChatHub").build();
+    var globalId = null;
+
+    conn.start().then(() => { globalId = conn.connectionId ; }).catch((e) => console.error(e.toString()));
+
+    conn.on("updateListaUsuarios", function (usuarios) {
+        var usu_list = document.getElementById("usuarios");
+        usu_list.innerHTML = "";
+
+        if (usuarios.length > 0) {
+            usuarios.map(u => {
+                var u_li = document.createElement("li");
+                if (u == globalId) {
+                    u_li.textContent = u + " (YO) : ";
+                } else {
+                    u_li.textContent = u + ": ";
+
+                    var button = document.createElement("button");
+                    button.id = "EnviarPrivado";
+                    button.name = u;
+                    button.onclick = EnviarPrivado;
+                    button.textContent = "Enviar privado";
+                    u_li.appendChild(button);
+                }
+
+                usu_list.appendChild(u_li);
+            });
+        } else {
+            usu_list.innerHTML = "No hay usuarios conectados";
+        }
+    });
+
+    conn.on("RecibirMensaje", function (emisor, mensaje) {
+        var msj_li = document.createElement("li");
+        msj_li.textContent = emisor + ": " + mensaje;
+        document.getElementById("mensajes").appendChild(msj_li);
+    });
+
+    conn.on("RecibirMensajePrivado", function (emisor, mensaje) {
+        var msj_li = document.createElement("li");
+        msj_li.textContent = "Mensaje privado de: " + emisor + ": " + mensaje;
+        document.getElementById("mensajes").appendChild(msj_li);
+    });
+
+    document.getElementById("mensaje").addEventListener("keyup", function (e) {
+        if (e.key == 'Enter') {
+            var mensaje = document.getElementById("mensaje").value;
+
+            if (mensaje) {
+                conn.invoke("EnviarMensaje", mensaje);
+                document.getElementById("mensaje").value = "";
+            } else {
+                alert("Ingrese un mensaje");
+            }
+        }
+    });
+
+    document.getElementById("enviar").addEventListener("click", function () {
+        var mensaje = document.getElementById("mensaje").value;
+
+        if (mensaje) {
+            conn.invoke("EnviarMensaje", mensaje);
+            document.getElementById("mensaje").value = "";
+        } else {
+            alert("Ingrese un mensaje");
+        }
+    });
+
+    document.getElementById("getUsers").addEventListener("click", function () {
+        conn.invoke("GetCurrentUsers").then((res) => {
+            console.log(res);
+        });
+    });
+
+    function EnviarPrivado() {
+        var receptor = this.name;
+        var mensaje = document.getElementById("mensaje").value;
+
+        if (mensaje) {
+            try {
+                conn.invoke("EnviarMensajePrivado", receptor, mensaje);
+                document.getElementById("mensaje").value = "";
+
+                var msj_li = document.createElement("li");
+                msj_li.textContent = "Enviaste un mensaje privado a " + receptor + ": " + mensaje;
+                document.getElementById("mensajes").appendChild(msj_li);
+            } catch (e) {
+                console.error(e);
+            }
+            
+        } else {
+            alert("Ingrese un mensaje");
+        }
+    }
+</script>
